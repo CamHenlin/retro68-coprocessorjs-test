@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Workspace Name="HelloWorld" Database="" Version="10.0.0">
+  <Project Name="HelloWorld" Path="HelloWorld.project" Active="Yes"/>
+  <Project Name="MenuSample" Path="../MenuSample/MenuSample.project" Active="No"/>
+  <BuildMatrix>
+    <WorkspaceConfiguration Name="Default Config" Selected="yes">
+      <Environment/>
+      <Project Name="HelloWorld" ConfigName="pce-mac-plus-sys608"/>
+      <Project Name="MenuSample" ConfigName="pce-mac-plus-sys608"/>
+    </WorkspaceConfiguration>
+  </BuildMatrix>
+</CodeLite_Workspace>

@@ -1,0 +1,1 @@
+/home/macdev/Documents/Retro68/Retro68-build/toolchain/bin/m68k-apple-macos-g++      CMakeFiles/HelloWorld.dir/hello.c.obj  -o HelloWorld.flt  -lRetroConsole 

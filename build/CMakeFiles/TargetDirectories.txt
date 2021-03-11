@@ -1,0 +1,4 @@
+/home/macdev/Documents/Retro68kApps/HelloWorld/build/CMakeFiles/edit_cache.dir
+/home/macdev/Documents/Retro68kApps/HelloWorld/build/CMakeFiles/rebuild_cache.dir
+/home/macdev/Documents/Retro68kApps/HelloWorld/build/CMakeFiles/HelloWorld_APPL.dir
+/home/macdev/Documents/Retro68kApps/HelloWorld/build/CMakeFiles/HelloWorld.dir

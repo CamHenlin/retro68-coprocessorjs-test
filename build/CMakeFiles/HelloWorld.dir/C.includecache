@@ -1,0 +1,20 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/macdev/Documents/Retro68kApps/HelloWorld/hello.c
+stdio.h
+-
+Serial.h
+-
+math.h
+-
+Devices.h
+-
+string.h
+/home/macdev/Documents/Retro68kApps/HelloWorld/string.h
+
