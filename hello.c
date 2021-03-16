@@ -78,7 +78,7 @@ void setupSerialPort(const char *name) {
     }
 
     short serialPortOutput = 0; // TODO: why is this always 0? is this right?
-    short serialPortInput = 1; // TODO: not realy sure what this should be - just incrementing from the last item here
+    short serialPortInput = 0; // TODO: not realy sure what this should be - just incrementing from the last item here
 
     OSErr err = MacOpenDriver(serialPortOutputName, &serialPortOutput); // results in 0 - i think this is good
     char errMessage[100];
@@ -90,7 +90,7 @@ void setupSerialPort(const char *name) {
         return;
     }
 
-    err = MacOpenDriver(serialPortInputName, &serialPortInput); // results in -43 fnfErr: File not found
+    err = MacOpenDriver(serialPortInputName, &serialPortInput); // result in 0 but still doesn't work
 
     sprintf(errMessage, "err:%d\n", err);
     printf(errMessage);
@@ -100,8 +100,11 @@ void setupSerialPort(const char *name) {
         return;
     }
 
+    // from https://developer.apple.com/library/archive/documentation/mac/pdf/Devices/Serial_Driver.pdf
+    // Set baud rate and data format. Note that you only need to set the}
+    // { output driver; the settings are reflected on the input side
     setupPBControlForSerialPort(serialPortOutput);
-    setupPBControlForSerialPort(serialPortInput); // TODO: not really sure if this is right for inputs
+    // setupPBControlForSerialPort(serialPortInput); // TODO: not really sure if this is right for inputs
 
     outgoingSerialPortReference.ioRefNum = serialPortOutput;
     incomingSerialPortReference.ioRefNum = serialPortInput; // TODO: not really sure if this is right for inputs
@@ -121,14 +124,29 @@ char* readSerialPort() {
     printf("attempting to read from serial port...\n");
 
     char *stringToReadFromSerial;
+    long int byteCount = 0;
+    short serGetBufStatus;
 
     incomingSerialPortReference.ioBuffer = (Ptr) stringToReadFromSerial;
-    incomingSerialPortReference.ioReqCount = 1; // TODO: we need an expected receive length. coprocessor.js needs to supply set chunk sizes?
+    incomingSerialPortReference.ioReqCount = 256; // TODO: we need an expected receive length. coprocessor.js needs to supply set chunk sizes?
     // TODO pretend for now - i'm assuming we need to chunk reads and figure out when to stop in the future
     // TODO: we need to figure out the proper format for coprocessor, but it needs to be able to tell us that there is more data and that we should call
     // PBRead repetively.
 
-    OSErr err = PBRead((ParmBlkPtr)& incomingSerialPortReference, 0);
+    // https://developer.apple.com/library/archive/documentation/mac/pdf/Devices/Serial_Driver.pdf
+    // For example, because the PBRead function requires you to specify the number of bytes
+    // to be read, you need to determine how many bytes are in the input driver’s buffer before
+    // you call PBRead. You can use the SerGetBuf function to determine how many
+    // characters are in the input buffer, as shown in Listing 7-1.
+    // TODO this loop is gross
+    while (byteCount == 0) {
+        printf("attempting to call SerGetBuffer\n");
+        serGetBufStatus = SerGetBuf(incomingSerialPortReference.ioRefNum, &byteCount);
+        char byteCountMessage[100];
+        sprintf(byteCountMessage, "serGetBufStatus: %d, byteCount:%d\n", serGetBufStatus, byteCount); // both of these appear to always be 0
+        printf(byteCountMessage);
+    }
+    OSErr err = PBRead((ParmBlkPtr)& incomingSerialPortReference, byteCount);
     char errMessage[100];
     sprintf(errMessage, "err:%d\n", err);
     printf(errMessage);
@@ -223,7 +241,7 @@ char* callEvalOnCoprocessor(char* toEval) {
 int main(int argc, char** argv) {
 
     printf("CoprocessorJS Test App: starting...\n");
-    printf("CoprocessorJS Test App: setting up printer port...\n");
+    printf("CoprocessorJS Test App: setting up modem port...\n");
 
     setupCoprocessor("modem"); // could also be "printer", modem is 0 in PCE settings
 
