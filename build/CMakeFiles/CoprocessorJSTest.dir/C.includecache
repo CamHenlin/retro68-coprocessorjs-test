@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/camh/Documents/Retro68kApps/CoprocessorJSTest/hello.c
+stdio.h
+-
+stdio.h
+-
+Serial.h
+-
+math.h
+-
+Devices.h
+-
+string.h
+/home/camh/Documents/Retro68kApps/CoprocessorJSTest/string.h
+

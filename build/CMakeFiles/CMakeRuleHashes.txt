@@ -1,3 +1,3 @@
 # Hashes of file build rules.
-096524bef2f421c09c4da51c23388eb9 CMakeFiles/HelloWorld_APPL
-3b97e6c54428a621ccdb497fd17644c3 HelloWorld.bin
+5d7338b09d8c1eb9e2b8bdbbe24ada6a CMakeFiles/CoprocessorJSTest_APPL
+87d09a80eddedafe05f02ceb6ca9596d CoprocessorJSTest.bin

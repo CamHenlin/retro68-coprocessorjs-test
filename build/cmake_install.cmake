@@ -1,8 +1,8 @@
-# Install script for directory: /home/macdev/Documents/Retro68kApps/HelloWorld
+# Install script for directory: /home/camh/Documents/Retro68kApps/CoprocessorJSTest
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/macdev/Documents/Retro68/Retro68-build/toolchain/m68k-apple-macos")
+  set(CMAKE_INSTALL_PREFIX "/home/camh/Retro68-build/toolchain/m68k-apple-macos")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -27,6 +27,11 @@ if(NOT CMAKE_INSTALL_COMPONENT)
   endif()
 endif()
 
+# Is this installation the result of a crosscompile?
+if(NOT DEFINED CMAKE_CROSSCOMPILING)
+  set(CMAKE_CROSSCOMPILING "TRUE")
+endif()
+
 if(CMAKE_INSTALL_COMPONENT)
   set(CMAKE_INSTALL_MANIFEST "install_manifest_${CMAKE_INSTALL_COMPONENT}.txt")
 else()
@@ -35,5 +40,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/macdev/Documents/Retro68kApps/HelloWorld/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/camh/Documents/Retro68kApps/CoprocessorJSTest/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
