@@ -123,38 +123,76 @@ char* readSerialPort() {
     
     printf("attempting to read from serial port...\n");
 
-    char *stringToReadFromSerial;
     long int byteCount = 0;
     short serGetBufStatus;
-
-    incomingSerialPortReference.ioBuffer = (Ptr) stringToReadFromSerial;
-    incomingSerialPortReference.ioReqCount = 256; // TODO: we need an expected receive length. coprocessor.js needs to supply set chunk sizes?
-    // TODO pretend for now - i'm assuming we need to chunk reads and figure out when to stop in the future
-    // TODO: we need to figure out the proper format for coprocessor, but it needs to be able to tell us that there is more data and that we should call
-    // PBRead repetively.
+    char completeStringToReadFromSerial[1024]; // TODO: 1kbyte max window - is this ok? document at least
+    const int MAX_POLLS = 1000;
+    int current_polls = 0;
 
     // https://developer.apple.com/library/archive/documentation/mac/pdf/Devices/Serial_Driver.pdf
     // For example, because the PBRead function requires you to specify the number of bytes
     // to be read, you need to determine how many bytes are in the input driver’s buffer before
     // you call PBRead. You can use the SerGetBuf function to determine how many
     // characters are in the input buffer, as shown in Listing 7-1.
-    // TODO this loop is gross
-    while (byteCount == 0) {
-        printf("attempting to call SerGetBuffer\n");
-        serGetBufStatus = SerGetBuf(incomingSerialPortReference.ioRefNum, &byteCount);
-        char byteCountMessage[100];
-        sprintf(byteCountMessage, "serGetBufStatus: %d, byteCount:%d\n", serGetBufStatus, byteCount); // both of these appear to always be 0
-        printf(byteCountMessage);
+    // TODO this loop is gross - we're looping until we get the final ";;@@&&" delimeter from the nodejs service
+    while (strstr(completeStringToReadFromSerial, ";;@@&&") == NULL) {
+
+        char stringToReadFromSerial[1024]; // TODO: 1kbyte max window per buffer event - is this ok? document at least
+        // probably over-allocated on slow systems
+
+        // this loop is kind of gross too
+        while (byteCount == 0) {
+
+            if (current_polls++ > MAX_POLLS) {
+                
+                return "too slow";
+            }
+
+            //printf("attempting to call SerGetBuffer\n");
+
+            serGetBufStatus = SerGetBuf(incomingSerialPortReference.ioRefNum, &byteCount);
+
+            //char byteCountMessage[100];
+            //sprintf(byteCountMessage, "serGetBufStatus: %d, byteCount:%d\n", serGetBufStatus, byteCount); // both of these appear to always be 0
+            //printf(byteCountMessage);
+        }
+
+        incomingSerialPortReference.ioBuffer = (Ptr) stringToReadFromSerial;
+        incomingSerialPortReference.ioReqCount = byteCount; // TODO: what if we read before the buffer is full?
+        // TODO: we need an expected receive length. coprocessor.js needs to supply set chunk sizes?
+        // TODO pretend for now - i'm assuming we need to chunk reads and figure out when to stop in the future
+        // TODO: we need to figure out the proper format for coprocessor, but it needs to be able to tell us that there is more data and that we should call
+        // PBRead repetively.
+    
+        //printf("attempting to call PBRead\n");
+        OSErr err = PBRead((ParmBlkPtr)& incomingSerialPortReference, 0);
+        //printf("back from to call PBRead\n");
+        char errMessage[100];
+        //sprintf(errMessage, "err:%d\n", err);
+        //printf(errMessage);
+        
+        //char resultsFromPBRead[100];
+        //sprintf(resultsFromPBRead, "results: %s", incomingSerialPortReference.ioBuffer);
+        //printf(resultsFromPBRead);
+        
+        sprintf(completeStringToReadFromSerial, "%s%s", completeStringToReadFromSerial, incomingSerialPortReference.ioBuffer);
+
+        printf("complete string from serial is now:\n");
+        printf(completeStringToReadFromSerial);
+        printf("\n");
+
+        byteCount = 0; // reset byteCount so we call SerGetBuf again - otherwise we will crash on the next PBRead
     }
-    OSErr err = PBRead((ParmBlkPtr)& incomingSerialPortReference, byteCount);
-    char errMessage[100];
-    sprintf(errMessage, "err:%d\n", err);
-    printf(errMessage);
+
     // TODO: also need a mechanism for ensuring we are on the right application_id/call_id on the response (thinking of if there are multiple coprocessor.js applications
     // running on the old Mac at once?)
     // TODO: we will need to implement a locking mechanism on coprocessor where it must be aware that it can only write one response at a time
+    // NewPTr is malloc for Classic Macintosh http://mirror.informatimago.com/next/developer.apple.com/documentation/mac/Memory/Memory-75.html
+    // TODO: this works but is leaking memory - the calling function must deallocate after usage
+    char *output = NewPtr(strlen(completeStringToReadFromSerial));
+    strncpy(output, completeStringToReadFromSerial, strlen(completeStringToReadFromSerial) - 1);
 
-    return stringToReadFromSerial;
+    return (output);
 }
 
 
@@ -213,6 +251,14 @@ char* sendProgramToCoprocessor(char* program) {
 
     writeToCoprocessor("PROGRAM", program);
     char* response = readSerialPort();
+
+    if (strstr(response, "SUCCESS") != NULL) {
+
+        printf("program loaded on coprocessor\n");
+    } else {
+        
+        printf("program NOT loaded on coprocessor. fail!\n");
+    }
 
     // TODO: rather than just returning the response we should check to see if it was successful then return a boolean
     return response;
