@@ -4,11 +4,14 @@
 #include <math.h>
 #include <Devices.h>
 #include "string.h"
+#include <stdbool.h>
 
 char* application_id = "TEST_APPLICATION_1";
 int call_counter = 0;
-IOParam outgoingSerialPortReference; // TODO I think this is an accurate name
+IOParam outgoingSerialPortReference;
 IOParam incomingSerialPortReference;
+const bool PRINT_ERRORS = false;
+const bool DEBUGGING = false;
 
 /*
 // http://mirror.informatimago.com/next/developer.apple.com/documentation/mac/Devices/Devices-320.html
@@ -39,22 +42,24 @@ http://mirror.informatimago.com/next/developer.apple.com/documentation/mac/Devic
 void setupPBControlForSerialPort(short serialPortShort) {
 
     CntrlParam cb;
-    cb.ioCRefNum = serialPortShort; // TODO: this is always 0
-    cb.csCode = 8; // TODO: not sure what this is for
-    cb.csParam[0] = stop10 | noParity | data8 | baud9600; // TODO: can we achieve higher than 9600 baud?
+    cb.ioCRefNum = serialPortShort; // TODO: this is always 0 - does it matter? should we hard code 0 here? research
+    cb.csCode = 8; // TODO: need to look up and document what csCode = 8 means
+    cb.csParam[0] = stop10 | noParity | data8 | baud9600; // TODO: can we achieve higher than 9600 baud? - should be able to achieve at least 19.2k on a 68k machine
     OSErr err = PBControl ((ParmBlkPtr) & cb, 0); // PBControl definition: http://mirror.informatimago.com/next/developer.apple.com/documentation/mac/Networking/Networking-296.html
-    // second param there is async -- could be OK for what we are doing? TODO: investigate
-    char errMessage[100];
-    sprintf(errMessage, "err:%d\n", err);
-    printf(errMessage);
+
+    if (PRINT_ERRORS) {
+
+        char errMessage[100];
+        sprintf(errMessage, "err:%d\n", err);
+        printf(errMessage);
+    }
+
     if (err < 0) {
 
         return;
     }
-
 }
 
-// all of the "inbound" stuff here is TODO
 void setupSerialPort(const char *name) {
 #define MODEM_PORT_OUT   "\p.AOut"
 #define MODEM_PORT_IN    "\p.AIn"
@@ -80,10 +85,14 @@ void setupSerialPort(const char *name) {
     short serialPortOutput = 0; // TODO: why is this always 0? is this right?
     short serialPortInput = 0; // TODO: not realy sure what this should be - just incrementing from the last item here
 
-    OSErr err = MacOpenDriver(serialPortOutputName, &serialPortOutput); // results in 0 - i think this is good
-    char errMessage[100];
-    sprintf(errMessage, "err:%d\n", err);
-    printf(errMessage);
+    OSErr err = MacOpenDriver(serialPortOutputName, &serialPortOutput);
+    
+    if (PRINT_ERRORS) {
+
+        char errMessage[100];
+        sprintf(errMessage, "err:%d\n", err);
+        printf(errMessage);
+    }
 
     if (err < 0) {
 
@@ -92,105 +101,74 @@ void setupSerialPort(const char *name) {
 
     err = MacOpenDriver(serialPortInputName, &serialPortInput); // result in 0 but still doesn't work
 
-    sprintf(errMessage, "err:%d\n", err);
-    printf(errMessage);
+    if (PRINT_ERRORS) {
+
+        char errMessage[100];
+        sprintf(errMessage, "err:%d\n", err);
+        printf(errMessage);
+    }
 
     if (err < 0) {
 
         return;
     }
 
-    // from https://developer.apple.com/library/archive/documentation/mac/pdf/Devices/Serial_Driver.pdf
-    // Set baud rate and data format. Note that you only need to set the}
-    // { output driver; the settings are reflected on the input side
+    // From https://developer.apple.com/library/archive/documentation/mac/pdf/Devices/Serial_Driver.pdf
+    // Set baud rate and data format. Note that you only need to set the
+    // output driver; the settings are reflected on the input side
     setupPBControlForSerialPort(serialPortOutput);
-    // setupPBControlForSerialPort(serialPortInput); // TODO: not really sure if this is right for inputs
 
     outgoingSerialPortReference.ioRefNum = serialPortOutput;
-    incomingSerialPortReference.ioRefNum = serialPortInput; // TODO: not really sure if this is right for inputs
+    incomingSerialPortReference.ioRefNum = serialPortInput;
 }
 
-/*
-need code for reading a serial port, maybe this is right
-untested
-
-is PBRead what we want? (From Inside Macintosh Volume II-185)
-PBRead attempts to read ioReqCount bytes from the device driver having the reference number ioRefNum, and transfer them to the data buffer pointed to by ioBuffer.
- The drive number, if any, of the device to be read from is specified by ioVRefNum. Afterthereadiscompleted,the position is returned in ioPosOffset and the number
- of bytes actually read is returned in ioActCount.
-*/
 char* readSerialPort() {
-    
-    printf("attempting to read from serial port...\n");
 
-    long int byteCount = 0;
-    short serGetBufStatus;
-    char completeStringToReadFromSerial[1024]; // TODO: 1kbyte max window - is this ok? document at least
-    const int MAX_POLLS = 1000;
-    int current_polls = 0;
+    if (DEBUGGING) {
 
-    // https://developer.apple.com/library/archive/documentation/mac/pdf/Devices/Serial_Driver.pdf
-    // For example, because the PBRead function requires you to specify the number of bytes
-    // to be read, you need to determine how many bytes are in the input driver’s buffer before
-    // you call PBRead. You can use the SerGetBuf function to determine how many
-    // characters are in the input buffer, as shown in Listing 7-1.
-    // TODO this loop is gross - we're looping until we get the final ";;@@&&" delimeter from the nodejs service
-    while (strstr(completeStringToReadFromSerial, ";;@@&&") == NULL) {
-
-        char stringToReadFromSerial[1024]; // TODO: 1kbyte max window per buffer event - is this ok? document at least
-        // probably over-allocated on slow systems
-
-        // this loop is kind of gross too
-        while (byteCount == 0) {
-
-            if (current_polls++ > MAX_POLLS) {
-                
-                return "too slow";
-            }
-
-            //printf("attempting to call SerGetBuffer\n");
-
-            serGetBufStatus = SerGetBuf(incomingSerialPortReference.ioRefNum, &byteCount);
-
-            //char byteCountMessage[100];
-            //sprintf(byteCountMessage, "serGetBufStatus: %d, byteCount:%d\n", serGetBufStatus, byteCount); // both of these appear to always be 0
-            //printf(byteCountMessage);
-        }
-
-        incomingSerialPortReference.ioBuffer = (Ptr) stringToReadFromSerial;
-        incomingSerialPortReference.ioReqCount = byteCount; // TODO: what if we read before the buffer is full?
-        // TODO: we need an expected receive length. coprocessor.js needs to supply set chunk sizes?
-        // TODO pretend for now - i'm assuming we need to chunk reads and figure out when to stop in the future
-        // TODO: we need to figure out the proper format for coprocessor, but it needs to be able to tell us that there is more data and that we should call
-        // PBRead repetively.
-    
-        //printf("attempting to call PBRead\n");
-        OSErr err = PBRead((ParmBlkPtr)& incomingSerialPortReference, 0);
-        //printf("back from to call PBRead\n");
-        char errMessage[100];
-        //sprintf(errMessage, "err:%d\n", err);
-        //printf(errMessage);
-        
-        //char resultsFromPBRead[100];
-        //sprintf(resultsFromPBRead, "results: %s", incomingSerialPortReference.ioBuffer);
-        //printf(resultsFromPBRead);
-        
-        sprintf(completeStringToReadFromSerial, "%s%s", completeStringToReadFromSerial, incomingSerialPortReference.ioBuffer);
-
-        printf("complete string from serial is now:\n");
-        printf(completeStringToReadFromSerial);
-        printf("\n");
-
-        byteCount = 0; // reset byteCount so we call SerGetBuf again - otherwise we will crash on the next PBRead
+        printf("attempting to read from serial port...\n");
     }
 
-    // TODO: also need a mechanism for ensuring we are on the right application_id/call_id on the response (thinking of if there are multiple coprocessor.js applications
-    // running on the old Mac at once?)
-    // TODO: we will need to implement a locking mechanism on coprocessor where it must be aware that it can only write one response at a time
-    // NewPTr is malloc for Classic Macintosh http://mirror.informatimago.com/next/developer.apple.com/documentation/mac/Memory/Memory-75.html
-    // TODO: this works but is leaking memory - the calling function must deallocate after usage
+    long int byteCount = 0;
+    long int lastByteCount = 0;
+    short serGetBufStatus;
+    char completeStringToReadFromSerial[1024]; // TODO: 1kbyte max window - is this ok? document at least - this would prevent big responses from the nodejs service
+    time_t start, end; // setup stall -- do we like this? TODO: research best practices for reading serial ports
+
+    // this loop is to iterate until the byteCount matches for 2 iterations.
+    // the idea is that if the byteCount matches, there is no more data being written
+    // to the buffer and we can begin our read.
+    // this could potentially not work right if writes are slow and the loop executes fast so we mitigate with a timer
+    // TODO: look online to see if there are better best practices to implement around this and reading serial buffers
+    while (byteCount != lastByteCount || byteCount == 0) {
+
+        time(&start);
+
+        do {
+
+            time(&end);
+        } while (difftime(end, start) <= 0.001); // param here is in seconds
+
+        lastByteCount = byteCount;
+        serGetBufStatus = SerGetBuf(incomingSerialPortReference.ioRefNum, &byteCount); //  TODO: handle status, should be 0 for success, any other is error. type is short
+    }
+
+    incomingSerialPortReference.ioBuffer = (Ptr) completeStringToReadFromSerial;
+    incomingSerialPortReference.ioReqCount = byteCount;
+
+    OSErr err = PBRead((ParmBlkPtr)& incomingSerialPortReference, 0); // 0 is sync
+
+    if (PRINT_ERRORS) {
+
+        char errMessage[100];
+        sprintf(errMessage, "err:%d\n", err);
+        printf(errMessage);
+    }
+
+    // NewPtr is malloc for Classic Macintosh http://mirror.informatimago.com/next/developer.apple.com/documentation/mac/Memory/Memory-75.html
+    // TODO: this works but is leaking memory - the calling function must deallocate after usage -- consider having calling functions provide a variable to write to
     char *output = NewPtr(strlen(completeStringToReadFromSerial));
-    strncpy(output, completeStringToReadFromSerial, strlen(completeStringToReadFromSerial) - 1);
+    strncpy(output, completeStringToReadFromSerial, strlen(completeStringToReadFromSerial));// - 1);
 
     return (output);
 }
@@ -206,14 +184,17 @@ OSErr writeSerialPort(const char* stringToWrite) {
     // PBWrite takes ioReqCount bytes from the buffer pointed to by ioBuffer and attempts to write them to the device driver having the reference number ioRefNum.
     // The drive number, if any, of the device to be written to is specified by ioVRefNum. After the write is completed, the position is returned in ioPosOffset and the number of bytes actually written is returned in ioActCount.
     OSErr err = PBWrite((ParmBlkPtr)& outgoingSerialPortReference, 0); // second param is async, TODO: investigate // returns -51:rfNumErr: refnum error
-    char errMessage[100];
-    sprintf(errMessage, "err:%d\n", err);
-    printf(errMessage);
+    
+    if (PRINT_ERRORS) {
+
+        char errMessage[100];
+        sprintf(errMessage, "err:%d\n", err);
+        printf(errMessage);
+    }
+
     return err;
 }
 
-// TODO: what else does this function need?
-// maybe setting application ID in a local state rather than tracking it globally
 void setupCoprocessor(const char *name) {
 
     setupSerialPort(name);
@@ -224,17 +205,102 @@ void setupCoprocessor(const char *name) {
 OSErr closeSerialPort() {
 
     OSErr err = MacCloseDriver(outgoingSerialPortReference.ioRefNum);
-    char errMessage[100];
-    sprintf(errMessage, "err:%d\n", err);
-    printf(errMessage);
+    
+    if (PRINT_ERRORS) {
+
+        char errMessage[100];
+        sprintf(errMessage, "err:%d\n", err);
+        printf(errMessage);
+    }
+
     return err;
+}
+
+char * _getReturnValueFromResponse(char* response, char* application_id, char* call_counter, char* operation) {
+
+    // get the first token in to memory
+    char* token = strtok(response, ";;;");
+
+    // placeholder for the final output of the function
+    char* output;
+    
+    // we need to track the token that we are on because the coprocessor.js responses are standardized
+    // so the tokens at specific positions will map to specific items in the response
+    int tokenCounter = 0;
+
+    // loop through the string to extract all other tokens
+    while (token != NULL) {
+
+        switch (tokenCounter) {
+
+            case 0: // APPLICATION ID
+
+                if (strcmp(token, application_id) != 0) {
+
+                    return "application id mismatch"; // TODO figure out better error handling
+                }
+
+                break;
+            case 1: // CALL COUNTER
+
+                if (strcmp(token, call_counter) != 0) {
+
+                    return "call counter mismatch"; // TODO figure out better error handling
+                }
+ 
+                break;
+            case 2: // OPERATION
+
+                if (strcmp(token, operation) != 0) {
+                    
+                    printf("operation mismatch - operation is\n");
+                    printf(operation);
+                    printf("\n");
+                    printf(token);
+                    printf("\n^^\n");
+
+                    return "operation mismatch"; // TODO figure out better error handling
+                }
+
+                break;
+            case 3: // STATUS
+
+                if (strcmp(token, "SUCCESS") != 0) {
+
+                    return "operation failed"; // TODO figure out better error handling
+                }
+
+                break;
+            case 4:
+
+                output = token;
+
+            default:
+
+                break;
+        }
+
+        // get the next token. strtok has some weird syntax
+        token = strtok(NULL, ";;;");
+        tokenCounter++;
+    }
+
+    // TODO: this is a memory leak - consider providing an output variable in the parameters
+    int allocationSize = 1024;
+    char *output2 = NewPtr(allocationSize);
+    strncpy(output2, output, allocationSize);
+
+    return (output2);
 }
 
 void writeToCoprocessor(char* operation, char* operand) {
 
     const char* messageTemplate = "%s;;;%s;;;%s;;;%s;;@@&&"; // see: https://github.com/CamHenlin/coprocessor.js/blob/main/index.js#L25
     char call_id[32];
-    char messageToSend[10000]; // TODO need to not over/under allocate -- or figure out how to tell coprocessor that we are going to send chunks if we have to
+
+    // over-allocate by 1kb for the operand (which could be an entire nodejs app) + message template wrapper
+    // and other associated info. wasting a tiny bit of memory here, could get more precise if memory becomes a problem.
+    char messageToSend[strlen(operand) + 1024];
 
     sprintf(call_id, "%d", call_counter++);
 
@@ -242,54 +308,77 @@ void writeToCoprocessor(char* operation, char* operand) {
     sprintf(messageToSend, messageTemplate, application_id, call_id, operation, operand);
 
     OSErr err = writeSerialPort(messageToSend);
-    char errMessage[100];
-    sprintf(errMessage, "writeToCoprocessor err:%d\n", err);
-    printf(errMessage);
+    
+    if (PRINT_ERRORS) {
+
+        char errMessage[100];
+        sprintf(errMessage, "writeToCoprocessor err:%d\n", err);
+        printf(errMessage);
+    }
+
+    return;
 }
 
+// must be called after writeToCoprocessor and before other writeToCoprocessor
+// operations because we depend on the location of call_counter
+char* getReturnValueFromResponse(char *response, char *operation) {
+
+    char *callCounterString;
+    sprintf(callCounterString, "%d", (call_counter - 1));
+
+    char *output = _getReturnValueFromResponse(response, application_id, callCounterString, operation);
+
+    return output;
+}
+
+// TODO: this is a function we would want to expose in a library
 char* sendProgramToCoprocessor(char* program) {
 
     writeToCoprocessor("PROGRAM", program);
+
     char* response = readSerialPort();
+    char *returnValue = getReturnValueFromResponse(response, "PROGRAM");
 
-    if (strstr(response, "SUCCESS") != NULL) {
-
-        printf("program loaded on coprocessor\n");
-    } else {
-        
-        printf("program NOT loaded on coprocessor. fail!\n");
-    }
-
-    // TODO: rather than just returning the response we should check to see if it was successful then return a boolean
-    return response;
+    return returnValue;
 }
 
+// TODO: this is a function we would want to expose in a library
 char* callFunctionOnCoprocessor(char* functionName, char* parameters) {
 
     const char* functionTemplate = "%s&&&%s";
-    char functionCallMessage[10000]; // TODO
-    sprintf(functionCallMessage, functionTemplate, functionName, parameters); // TODO: should parameters be a list that we join?
+
+    // over-allocate by 1kb for the operand (which could be whatever a programmer sends to this function) + message template wrapper
+    // and other associated info. wasting a tiny bit of memory here, could get more precise if memory becomes a problem.
+    char functionCallMessage[strlen(parameters) + 1024];
+
+    // delimeter for function paramters is &&& - user must do this on their own via sprintf call or other construct - this is easiest for us to deal with
+    sprintf(functionCallMessage, functionTemplate, functionName, parameters);
 
     writeToCoprocessor("FUNCTION", functionCallMessage);
-    char* response = readSerialPort();
 
-    return response;
+    char* response = readSerialPort();
+    char *returnValue = getReturnValueFromResponse(response, "FUNCTION");
+
+    return returnValue;
 }
 
+// TODO: this is a function we would want to expose in a library
 char* callEvalOnCoprocessor(char* toEval) {
 
     writeToCoprocessor("EVAL", toEval);
-    char* response = readSerialPort();
 
-    return response;
+    char* response = readSerialPort();
+    char *returnValue = getReturnValueFromResponse(response, "EVAL");
+
+    return returnValue;
 }
 
 int main(int argc, char** argv) {
 
     printf("CoprocessorJS Test App: starting...\n");
-    printf("CoprocessorJS Test App: setting up modem port...\n");
+    printf("CoprocessorJS Test App: setting up serial port...\n");
 
-    setupCoprocessor("modem"); // could also be "printer", modem is 0 in PCE settings
+    setupCoprocessor("modem"); // could also be "printer", modem is 0 in PCE settings - printer would be 1
 
     // TODO: figure out how to move these to Mac resource files. I'm pretty sure the format is pretty easy to follow and extract from
     // started taking a stab at some of this in the Makefile
@@ -297,22 +386,26 @@ int main(int argc, char** argv) {
     const char* TEST_INDEX = "const _ = require('lodash')\nclass SimpleNodeThing {\n  static isEmpty (variable) {\n    return _.isEmpty(variable)\n  }\n  isEmpty (variable) {\n    return this.constructor.isEmpty(variable)\n  }\n}\nmodule.exports = SimpleNodeThing";
     const char* TEST_PACKAGE = "{\n  \"name\": \"test\",\n  \"version\": \"1.0.0\",\n  \"description\": \"\",\n  \"main\": \"index.js\",\n  \"scripts\": {\n    \"test\": \"\"\n  },\n  \"author\": \"\",\n  \"license\": \"ISC\",\n  \"dependencies\": {\n    \"lodash\": \"^4.17.21\"\n  }\n}";
 
-    // TODO: set length as required
-    char programCall[10000];
+    char programCall[strlen(TEST_INDEX) + strlen(TEST_PACKAGE) + 1024];
 
     sprintf(programCall, "index.js@@@%s&&&package.json@@@%s", TEST_INDEX, TEST_PACKAGE);
 
     printf("CoprocessorJS Test App: attempting to send program to Coprocessor...\n");
-    sendProgramToCoprocessor(programCall);
-    
-    printf("CoprocessorJS Test App: attempting to call lodash isEmpty function on Coprocessor...\n");
-    char* jsFunctionResponse = callFunctionOnCoprocessor("isEmpty", "test");
+    char* programResult = sendProgramToCoprocessor(programCall);
 
-    printf("CoprocessorJS Test App: attempting to eval code block on Coprocessor...\n");
-    callEvalOnCoprocessor("console.log(this)");
+    printf("CoprocessorJS Test App: load program result:\n");
+    printf(programResult);
+    printf("\n");
+    
+    printf("CoprocessorJS Test App: attempting to call lodash isEmpty function with parameter \"test\" on Coprocessor...\n");
+    char* jsFunctionResponse = callFunctionOnCoprocessor("isEmpty", "test");
 
     printf("CoprocessorJS Test App: isEmpty function call response:\n");
     printf(jsFunctionResponse);
+    printf("\n");
+
+    printf("CoprocessorJS Test App: attempting to eval code block on Coprocessor...\n");
+    callEvalOnCoprocessor("console.log(this)");
 
     printf("\ntest complete - process any key to quit\n");
     getchar();
