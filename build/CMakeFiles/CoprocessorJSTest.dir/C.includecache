@@ -7,6 +7,8 @@
 #IncludeRegexTransform: 
 
 /home/camh/Documents/Retro68kApps/CoprocessorJSTest/hello.c
+Resources.h
+-
 stdio.h
 -
 stdio.h
@@ -21,4 +23,10 @@ string.h
 /home/camh/Documents/Retro68kApps/CoprocessorJSTest/string.h
 stdbool.h
 -
+time.h
+-
+output_js.h
+/home/camh/Documents/Retro68kApps/CoprocessorJSTest/output_js.h
+
+/home/camh/Documents/Retro68kApps/CoprocessorJSTest/output_js.h
 
