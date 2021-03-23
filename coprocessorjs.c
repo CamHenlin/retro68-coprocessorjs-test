@@ -14,8 +14,9 @@ const bool DEBUGGING = false;
 const int RECEIVE_WINDOW_SIZE = 102400; // receive in up to 100kb chunks?
 const int MAX_RECEIVE_SIZE = RECEIVE_WINDOW_SIZE; // not sure if these ever need to be different
 char GlobalSerialInputBuffer[102400]; // make this match MAX_RECEIVE_SIZE
+
+char application_id[255];
 int call_counter = 0;
-char* application_id;
 
 // from: https://stackoverflow.com/questions/29847915/implementing-strtok-whose-delimiter-has-more-than-one-character
 // basically multichar delimter strtok
@@ -323,7 +324,7 @@ OSErr writeSerialPort(const char* stringToWrite) {
     return err;
 }
 
-void setupCoprocessor(const char *applicationId, const char *serialDeviceName) {
+void setupCoprocessor(char *applicationId, const char *serialDeviceName) {
     
     strcpy(application_id, applicationId);
 

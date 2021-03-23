@@ -2,7 +2,7 @@
 
 const int MAX_RECEIVE_SIZE;
 
-void setupCoprocessor(const char *application_id, const char *serialDeviceName);
+void setupCoprocessor(char *applicationId, const char *serialDeviceName);
 
 void sendProgramToCoprocessor(char* program, char *output);
 
