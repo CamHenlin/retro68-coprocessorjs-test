@@ -4,6 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
+  "/home/camh/Documents/Retro68kApps/CoprocessorJSTest/coprocessorjs.c" "/home/camh/Documents/Retro68kApps/CoprocessorJSTest/build/CMakeFiles/CoprocessorJSTest.dir/coprocessorjs.c.obj"
   "/home/camh/Documents/Retro68kApps/CoprocessorJSTest/hello.c" "/home/camh/Documents/Retro68kApps/CoprocessorJSTest/build/CMakeFiles/CoprocessorJSTest.dir/hello.c.obj"
   )
 set(CMAKE_C_COMPILER_ID "GNU")

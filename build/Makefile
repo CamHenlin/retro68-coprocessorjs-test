@@ -136,6 +136,33 @@ CoprocessorJSTest/fast:
 	$(MAKE) -f CMakeFiles/CoprocessorJSTest.dir/build.make CMakeFiles/CoprocessorJSTest.dir/build
 .PHONY : CoprocessorJSTest/fast
 
+coprocessorjs.obj: coprocessorjs.c.obj
+
+.PHONY : coprocessorjs.obj
+
+# target to build an object file
+coprocessorjs.c.obj:
+	$(MAKE) -f CMakeFiles/CoprocessorJSTest.dir/build.make CMakeFiles/CoprocessorJSTest.dir/coprocessorjs.c.obj
+.PHONY : coprocessorjs.c.obj
+
+coprocessorjs.i: coprocessorjs.c.i
+
+.PHONY : coprocessorjs.i
+
+# target to preprocess a source file
+coprocessorjs.c.i:
+	$(MAKE) -f CMakeFiles/CoprocessorJSTest.dir/build.make CMakeFiles/CoprocessorJSTest.dir/coprocessorjs.c.i
+.PHONY : coprocessorjs.c.i
+
+coprocessorjs.s: coprocessorjs.c.s
+
+.PHONY : coprocessorjs.s
+
+# target to generate assembly for a file
+coprocessorjs.c.s:
+	$(MAKE) -f CMakeFiles/CoprocessorJSTest.dir/build.make CMakeFiles/CoprocessorJSTest.dir/coprocessorjs.c.s
+.PHONY : coprocessorjs.c.s
+
 hello.obj: hello.c.obj
 
 .PHONY : hello.obj
@@ -173,6 +200,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... CoprocessorJSTest_APPL"
 	@echo "... CoprocessorJSTest"
+	@echo "... coprocessorjs.obj"
+	@echo "... coprocessorjs.i"
+	@echo "... coprocessorjs.s"
 	@echo "... hello.obj"
 	@echo "... hello.i"
 	@echo "... hello.s"

@@ -1,1 +1,1 @@
-/home/camh/Retro68-build/toolchain/bin/m68k-apple-macos-g++     CMakeFiles/CoprocessorJSTest.dir/hello.c.obj  -o CoprocessorJSTest.code.bin  -lRetroConsole 
+/home/camh/Retro68-build/toolchain/bin/m68k-apple-macos-g++     CMakeFiles/CoprocessorJSTest.dir/coprocessorjs.c.obj CMakeFiles/CoprocessorJSTest.dir/hello.c.obj  -o CoprocessorJSTest.code.bin  -lRetroConsole 

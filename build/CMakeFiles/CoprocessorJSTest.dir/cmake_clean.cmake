@@ -1,4 +1,5 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/CoprocessorJSTest.dir/coprocessorjs.c.obj"
   "CMakeFiles/CoprocessorJSTest.dir/hello.c.obj"
   "CoprocessorJSTest.code.bin"
   "CoprocessorJSTest.code.bin.pdb"

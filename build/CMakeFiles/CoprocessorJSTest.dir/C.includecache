@@ -6,11 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/camh/Documents/Retro68kApps/CoprocessorJSTest/hello.c
-Resources.h
--
-stdio.h
--
+/home/camh/Documents/Retro68kApps/CoprocessorJSTest/coprocessorjs.c
 stdio.h
 -
 Serial.h
@@ -25,8 +21,20 @@ stdbool.h
 -
 time.h
 -
+coprocessorjs.h
+/home/camh/Documents/Retro68kApps/CoprocessorJSTest/coprocessorjs.h
+
+/home/camh/Documents/Retro68kApps/CoprocessorJSTest/coprocessorjs.h
+
+/home/camh/Documents/Retro68kApps/CoprocessorJSTest/hello.c
+Resources.h
+-
+stdio.h
+-
 output_js.h
 /home/camh/Documents/Retro68kApps/CoprocessorJSTest/output_js.h
+coprocessorjs.h
+/home/camh/Documents/Retro68kApps/CoprocessorJSTest/coprocessorjs.h
 
 /home/camh/Documents/Retro68kApps/CoprocessorJSTest/output_js.h
 

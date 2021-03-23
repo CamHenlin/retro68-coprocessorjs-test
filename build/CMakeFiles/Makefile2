@@ -76,12 +76,12 @@ clean: CMakeFiles/CoprocessorJSTest.dir/clean
 CMakeFiles/CoprocessorJSTest_APPL.dir/all: CMakeFiles/CoprocessorJSTest.dir/all
 	$(MAKE) -f CMakeFiles/CoprocessorJSTest_APPL.dir/build.make CMakeFiles/CoprocessorJSTest_APPL.dir/depend
 	$(MAKE) -f CMakeFiles/CoprocessorJSTest_APPL.dir/build.make CMakeFiles/CoprocessorJSTest_APPL.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/camh/Documents/Retro68kApps/CoprocessorJSTest/build/CMakeFiles --progress-num=3 "Built target CoprocessorJSTest_APPL"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/camh/Documents/Retro68kApps/CoprocessorJSTest/build/CMakeFiles --progress-num=4 "Built target CoprocessorJSTest_APPL"
 .PHONY : CMakeFiles/CoprocessorJSTest_APPL.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/CoprocessorJSTest_APPL.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/camh/Documents/Retro68kApps/CoprocessorJSTest/build/CMakeFiles 3
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/camh/Documents/Retro68kApps/CoprocessorJSTest/build/CMakeFiles 4
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/CoprocessorJSTest_APPL.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/camh/Documents/Retro68kApps/CoprocessorJSTest/build/CMakeFiles 0
 .PHONY : CMakeFiles/CoprocessorJSTest_APPL.dir/rule
@@ -103,12 +103,12 @@ CMakeFiles/CoprocessorJSTest_APPL.dir/clean:
 CMakeFiles/CoprocessorJSTest.dir/all:
 	$(MAKE) -f CMakeFiles/CoprocessorJSTest.dir/build.make CMakeFiles/CoprocessorJSTest.dir/depend
 	$(MAKE) -f CMakeFiles/CoprocessorJSTest.dir/build.make CMakeFiles/CoprocessorJSTest.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/camh/Documents/Retro68kApps/CoprocessorJSTest/build/CMakeFiles --progress-num=1,2 "Built target CoprocessorJSTest"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/camh/Documents/Retro68kApps/CoprocessorJSTest/build/CMakeFiles --progress-num=1,2,3 "Built target CoprocessorJSTest"
 .PHONY : CMakeFiles/CoprocessorJSTest.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/CoprocessorJSTest.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/camh/Documents/Retro68kApps/CoprocessorJSTest/build/CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/camh/Documents/Retro68kApps/CoprocessorJSTest/build/CMakeFiles 3
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/CoprocessorJSTest.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/camh/Documents/Retro68kApps/CoprocessorJSTest/build/CMakeFiles 0
 .PHONY : CMakeFiles/CoprocessorJSTest.dir/rule

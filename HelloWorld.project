@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="CoprocessorJSTest" Version="10.0.0" InternalType="">
+  <Reconciliation>
+    <Regexes/>
+    <Excludepaths/>
+    <Ignorefiles/>
+    <Extensions>
+      <![CDATA[*.cpp;*.c;*.h;*.hpp;*.xrc;*.wxcp;*.fbp]]>
+    </Extensions>
+    <Topleveldir>/home/camh/Documents/Retro68kApps/CoprocessorJSTest</Topleveldir>
+  </Reconciliation>
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00070001N0005Debug0000000000000001N0011pce-mac-5120000000000000001N0015pce-mac-classic0000000000000001N0019pce-mac-plus-sys6080000000000000001N0019pce-mac-plus-sys7010000000000000001N0017pce-mac-se-sys7550000000000000001N0010pce-mac128000000000000]]>
@@ -22,6 +31,8 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="HelloWorld">
+    <File Name="coprocessorjs.h"/>
+    <File Name="coprocessorjs.c"/>
     <File Name="Makefile"/>
     <File Name="hello.c"/>
     <File Name="CMakeLists.txt"/>

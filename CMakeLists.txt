@@ -6,8 +6,12 @@
 
 cmake_minimum_required(VERSION 2.8)
 
+project (coprocessor_js_test)
+
 add_application(CoprocessorJSTest
     output_js.h
+    coprocessorjs.h
+    coprocessorjs.c
 	hello.c
 	CONSOLE
    )
